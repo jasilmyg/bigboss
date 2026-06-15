@@ -12,6 +12,7 @@ from googleapiclient.http import MediaFileUpload
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 import pickle
+import gspread
 
 
 # ─────────────────────────────────────────────
