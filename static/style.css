@@ -300,10 +300,10 @@ input, select, textarea { font-family: var(--font-main); }
   width: 100%; max-width: 1600px; margin: 0 auto;
 }
 
+.reg-layout::before,
 .reg-layout::after {
   content: "";
   position: absolute;
-  bottom: -40px;
   left: 2%;
   right: 2%;
   height: 6px;
@@ -312,6 +312,14 @@ input, select, textarea { font-family: var(--font-main); }
   border-radius: 50%;
   z-index: 25;
   pointer-events: none;
+}
+
+.reg-layout::before {
+  top: -40px;
+}
+
+.reg-layout::after {
+  bottom: -40px;
 }
 
 /* Left Panel */
