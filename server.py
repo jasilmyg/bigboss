@@ -221,6 +221,14 @@ def verify_otp():
 # ── Registration submission ───────────────────
 @app.route("/api/register", methods=["POST"])
 def register():
+    try:
+        return _register_impl()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Server Error: {str(e)}"}), 500
+
+def _register_impl():
     # multipart/form-data (video upload)
     full_name      = request.form.get("fullName", "").strip()
     contact_number = request.form.get("contactNumber", "").strip()
