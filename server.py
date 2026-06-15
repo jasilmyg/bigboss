@@ -26,7 +26,7 @@ _sheet = None
 def get_sheet():
     global _sheet
     if _sheet is not None:
-        return _sheet
+        return _sheet, ""
     try:
         if os.environ.get("GOOGLE_CREDENTIALS_JSON"):
             import json
@@ -38,17 +38,13 @@ def get_sheet():
         client = gspread.authorize(credentials)
         sheet = client.open_by_key(SPREADSHEET_ID).sheet1
         _sheet = sheet
-        return sheet
+        return sheet, ""
     except Exception as e:
-        print(f"[Sheets] Could not connect: {e}")
-        return None
-
+        return None, f"Could not connect: {str(e)}"
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 import pickle
-
-
 
 def get_drive_service():
     try:
@@ -111,10 +107,9 @@ def upload_to_drive(file_path, original_filename):
 def append_to_sheet(data: dict):
     """Append one registration row to the Google Sheet."""
     try:
-        sheet = get_sheet()
+        sheet, err = get_sheet()
         if sheet is None:
-            print("[Sheets] Skipping – sheet not configured yet.")
-            return False
+            return False, f"Sheet config error: {err}"
 
         # Ensure header row exists
         if sheet.row_count == 0 or sheet.cell(1, 1).value != "Timestamp":
@@ -142,10 +137,9 @@ def append_to_sheet(data: dict):
             data.get("consent2", ""),
         ]
         sheet.append_row(row)
-        return True
+        return True, ""
     except Exception as e:
-        print(f"[Sheets] Failed to append: {e}")
-        return False
+        return False, f"Append failed: {str(e)}"
 
 
 # ─────────────────────────────────────────────
@@ -297,25 +291,28 @@ def _register_impl():
     }
 
     # Save to Google Sheets
-    saved = append_to_sheet(record)
+    saved, sheet_err = append_to_sheet(record)
 
     # Always save locally as JSON backup
-    backup_path = os.path.join(os.path.dirname(__file__), "registrations_backup.json")
-    backups = []
-    if os.path.exists(backup_path):
-        with open(backup_path, "r") as f:
-            try:
-                backups = json.load(f)
-            except Exception:
-                backups = []
-    backups.append(record)
-    with open(backup_path, "w") as f:
-        json.dump(backups, f, indent=2)
+    try:
+        backup_path = os.path.join(os.path.dirname(__file__), "registrations_backup.json")
+        backups = []
+        if os.path.exists(backup_path):
+            with open(backup_path, "r") as f:
+                try:
+                    backups = json.load(f)
+                except Exception:
+                    backups = []
+        backups.append(record)
+        with open(backup_path, "w") as f:
+            json.dump(backups, f, indent=2)
+    except Exception as e:
+        print(f"[Backup] Failed to save backup: {e}")
 
     print(f"[Register] New entry: {full_name} | {contact_number} | Sheets={saved} | LocalVideo={video_filename}")
 
     if not saved:
-        return jsonify({"success": False, "message": "Failed to save data to Google Sheets. Please contact support."}), 500
+        return jsonify({"success": False, "message": f"Google Sheets Error: {sheet_err}"}), 500
 
     if video_filename and not video_filename.startswith("http"):
          return jsonify({"success": False, "message": "Failed to upload video to Google Drive. Please try again."}), 500
