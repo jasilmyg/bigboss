@@ -740,6 +740,12 @@ input, select, textarea { font-family: var(--font-main); }
   .upload-video-btn {
     width: 100%;
   }
+
+  /* Make Mohanlal image smaller in hero section on mobile */
+  .host-img {
+    height: 55vh;
+    max-height: 500px;
+  }
 }
 
 /* Very Small Phones */
