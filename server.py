@@ -23,6 +23,11 @@ SPREADSHEET_ID = "1bsbCYg1Y2yjlsEPuHbEjJBTb0ycHAPhWxzH1WXKHWw0"           # from
 SHEET_NAME = "Registrations"
 _sheet = None
 
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
 def get_sheet():
     global _sheet
     if _sheet is not None:
