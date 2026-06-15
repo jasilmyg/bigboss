@@ -83,15 +83,14 @@ def get_drive_service():
                 creds = flow.run_local_server(port=0)
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
-        return build('drive', 'v3', credentials=creds)
+        return build('drive', 'v3', credentials=creds), ""
     except Exception as e:
-        print(f"[Drive] Auth failed: {e}")
-        return None
+        return None, f"Auth failed: {str(e)}"
 
 def upload_to_drive(file_path, original_filename):
-    service = get_drive_service()
+    service, err = get_drive_service()
     if not service:
-        return ""
+        return "", f"Drive auth config error: {err}"
     try:
         file_metadata = {'name': original_filename, 'parents': ['1jGAYXpEs5nz0VsF0qSN0Kw79A7cI_6s2']}
         media = MediaFileUpload(file_path, resumable=True)
@@ -104,10 +103,9 @@ def upload_to_drive(file_path, original_filename):
             supportsAllDrives=True
         ).execute()
         
-        return file.get('webViewLink')
+        return file.get('webViewLink'), ""
     except Exception as e:
-        print(f"[Drive] Upload failed: {e}")
-        return ""
+        return "", f"Drive upload failed: {str(e)}"
 
 
 def append_to_sheet(data: dict):
@@ -271,7 +269,7 @@ def _register_impl():
             video.save(local_path)
             
             # Upload to Google Drive using OAuth
-            drive_url = upload_to_drive(local_path, safe_name)
+            drive_url, drive_err = upload_to_drive(local_path, safe_name)
             video_filename = drive_url if drive_url else safe_name
             
             if drive_url and os.path.exists(local_path):
@@ -321,7 +319,7 @@ def _register_impl():
         return jsonify({"success": False, "message": f"Google Sheets Error: {sheet_err}"}), 500
 
     if video_filename and not video_filename.startswith("http"):
-         return jsonify({"success": False, "message": "Failed to upload video to Google Drive. Please try again."}), 500
+         return jsonify({"success": False, "message": f"Google Drive Error: {drive_err}"}), 500
 
     return jsonify({
         "success": True,
