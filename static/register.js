@@ -241,7 +241,17 @@ if (form) {
       const fd = new FormData(form);
 
       const res  = await fetch(`${API}/api/register`, { method: 'POST', body: fd });
-      const data = await res.json();
+      
+      let data;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+          data = await res.json();
+      } else {
+          // If Render returned an HTML error page (like 502 Bad Gateway or 413 Payload Too Large)
+          const text = await res.text();
+          console.error("Non-JSON response:", res.status, text);
+          throw new Error(`Server returned ${res.status}: The file might be too large or the server timed out.`);
+      }
 
       if (data.success) {
         // Show success
@@ -256,7 +266,8 @@ if (form) {
         submitTxt.textContent = "I'M READY FOR AGNIPAREEKSHA!";
       }
     } catch (err) {
-      globalErr.textContent = 'Network error. Please check your connection and try again.';
+      console.error(err);
+      globalErr.textContent = err.message || 'Network error. Please check your connection and try again.';
       show(globalErr);
       submitBtn.disabled = false;
       submitTxt.textContent = "I'M READY FOR AGNIPAREEKSHA!";
