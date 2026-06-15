@@ -746,6 +746,15 @@ input, select, textarea { font-family: var(--font-main); }
     height: 55vh;
     max-height: 500px;
   }
+  
+  /* Center the host image on mobile */
+  .hero-right {
+    justify-content: center;
+    padding-right: 0;
+  }
+  .host-container {
+    justify-content: center;
+  }
 }
 
 /* Very Small Phones */
