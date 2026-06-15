@@ -23,49 +23,23 @@ SPREADSHEET_ID = "1bsbCYg1Y2yjlsEPuHbEjJBTb0ycHAPhWxzH1WXKHWw0"           # from
 SHEET_NAME = "Registrations"
 
 def get_sheet():
-    """Return the gspread worksheet.  Returns None until credentials are set."""
+    global _sheet
+    if _sheet is not None:
+        return _sheet
     try:
-        import gspread
-
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive",
-        ]
-        creds = Credentials.from_service_account_file(
-            GOOGLE_SHEETS_CREDENTIALS_FILE, scopes=scopes
-        )
-        client = gspread.authorize(creds)
-        
-        try:
-            sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
-        except gspread.exceptions.WorksheetNotFound:
-            sheet = client.open_by_key(SPREADSHEET_ID).sheet1
+        if os.environ.get("GOOGLE_CREDENTIALS_JSON"):
+            import json
+            creds_info = json.loads(os.environ.get("GOOGLE_CREDENTIALS_JSON"))
+            credentials = Credentials.from_service_account_info(creds_info, scopes=SCOPES)
+        else:
+            credentials = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
             
+        client = gspread.authorize(credentials)
+        sheet = client.open_by_key(SPREADSHEET_ID).sheet1
+        _sheet = sheet
         return sheet
     except Exception as e:
-        print(f"[Sheets] Not connected: {e}")
-        return None
-
-
-
-def get_drive_service():
-    try:
-        scopes = ["https://www.googleapis.com/auth/drive"]
-        creds = None
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
-                creds = pickle.load(token)
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', scopes)
-                creds = flow.run_local_server(port=0)
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
-        return build('drive', 'v3', credentials=creds)
-    except Exception as e:
-        print(f"[Drive] Not connected: {e}")
+        print(f"[Sheets] Could not connect: {e}")
         return None
 
 
@@ -73,18 +47,36 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 import pickle
 
+
+
 def get_drive_service():
     try:
         scopes = ["https://www.googleapis.com/auth/drive"]
         creds = None
-        if os.path.exists('token.pickle'):
+        
+        # Load from base64 env var if exists
+        import base64
+        import tempfile
+        import json
+        if os.environ.get("TOKEN_PICKLE_B64"):
+            creds = pickle.loads(base64.b64decode(os.environ.get("TOKEN_PICKLE_B64")))
+        elif os.path.exists('token.pickle'):
             with open('token.pickle', 'rb') as token:
                 creds = pickle.load(token)
+                
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', scopes)
+                # If running on Render, we MUST have token in env! Local fallback below.
+                if os.environ.get("CLIENT_SECRET_JSON"):
+                    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+                        f.write(os.environ.get("CLIENT_SECRET_JSON"))
+                        secret_file = f.name
+                else:
+                    secret_file = 'client_secret.json'
+                    
+                flow = InstalledAppFlow.from_client_secrets_file(secret_file, scopes)
                 creds = flow.run_local_server(port=0)
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
