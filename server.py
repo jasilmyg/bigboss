@@ -21,6 +21,7 @@ import pickle
 GOOGLE_SHEETS_CREDENTIALS_FILE = "credentials.json"   # service-account JSON
 SPREADSHEET_ID = "1bsbCYg1Y2yjlsEPuHbEjJBTb0ycHAPhWxzH1WXKHWw0"           # from the sheet URL
 SHEET_NAME = "Registrations"
+_sheet = None
 
 def get_sheet():
     global _sheet
@@ -109,38 +110,42 @@ def upload_to_drive(file_path, original_filename):
 
 def append_to_sheet(data: dict):
     """Append one registration row to the Google Sheet."""
-    sheet = get_sheet()
-    if sheet is None:
-        print("[Sheets] Skipping – sheet not configured yet.")
+    try:
+        sheet = get_sheet()
+        if sheet is None:
+            print("[Sheets] Skipping – sheet not configured yet.")
+            return False
+
+        # Ensure header row exists
+        if sheet.row_count == 0 or sheet.cell(1, 1).value != "Timestamp":
+            sheet.insert_row(
+                [
+                    "Timestamp", "Full Name", "Contact Number",
+                    "Age", "Gender", "Email", "City",
+                    "About Yourself", "Video Filename",
+                    "Consent 1", "Consent 2",
+                ],
+                index=1,
+            )
+
+        row = [
+            data.get("timestamp", ""),
+            data.get("fullName", ""),
+            data.get("contactNumber", ""),
+            data.get("age", ""),
+            data.get("gender", ""),
+            data.get("email", ""),
+            data.get("city", ""),
+            data.get("aboutYourself", ""),
+            data.get("videoFilename", ""),
+            data.get("consent1", ""),
+            data.get("consent2", ""),
+        ]
+        sheet.append_row(row)
+        return True
+    except Exception as e:
+        print(f"[Sheets] Failed to append: {e}")
         return False
-
-    # Ensure header row exists
-    if sheet.row_count == 0 or sheet.cell(1, 1).value != "Timestamp":
-        sheet.insert_row(
-            [
-                "Timestamp", "Full Name", "Contact Number",
-                "Age", "Gender", "Email", "City",
-                "About Yourself", "Video Filename",
-                "Consent 1", "Consent 2",
-            ],
-            index=1,
-        )
-
-    row = [
-        data.get("timestamp", ""),
-        data.get("fullName", ""),
-        data.get("contactNumber", ""),
-        data.get("age", ""),
-        data.get("gender", ""),
-        data.get("email", ""),
-        data.get("city", ""),
-        data.get("aboutYourself", ""),
-        data.get("videoFilename", ""),
-        data.get("consent1", ""),
-        data.get("consent2", ""),
-    ]
-    sheet.append_row(row)
-    return True
 
 
 # ─────────────────────────────────────────────
