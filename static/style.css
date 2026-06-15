@@ -776,3 +776,38 @@ input, select, textarea { font-family: var(--font-main); }
      padding-top: 20px;
   }
 }
+
+/* ================================================================
+   MOBILE TWEAKS - SHOW SOCIAL ICONS
+   ================================================================ */
+
+@media (max-width: 768px) {
+  /* Restore the social wrap, but remove its fixed width and background shape */
+  .nav-social-wrap {
+    display: flex !important;
+    width: auto;
+    flex: 1;
+    align-items: center;
+  }
+  .nav-shape-svg {
+    display: none !important; /* Hide the background SVG */
+  }
+  .nav-social-icons {
+    display: flex !important;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  /* Hide youtube icon to save space, user requested Instagram and Facebook */
+  #nav-yt-left {
+    display: none !important;
+  }
+  
+  .social-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    margin: 0 5px;
+  }
+}
