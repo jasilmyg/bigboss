@@ -77,12 +77,12 @@ input, select, textarea { font-family: var(--font-main); }
 }
 
 .asianet-logo {
-  height: 50px; margin-right: 20px;
+  height: 40px; margin-right: 20px;
   object-fit: contain;
 }
 
 .myg-logo {
-  height: 60px; margin-right: 30px;
+  height: 45px; margin-right: 30px;
   object-fit: contain;
 }
 
@@ -769,8 +769,8 @@ input, select, textarea { font-family: var(--font-main); }
   .top-nav {
     padding: 0 10px;
   }
-  .myg-logo, .hotstar-logo {
-    height: 30px;
+  .asianet-logo, .myg-logo, .hotstar-logo {
+    height: 25px;
   }
   .nav-social-icons {
     display: none; /* Hide social icons on very small screens to save space */
