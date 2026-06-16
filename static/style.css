@@ -380,11 +380,11 @@ input, select, textarea { font-family: var(--font-main); }
 /* Form Card */
 .form-card {
   width: 100%; max-width: 680px;
-  background: linear-gradient(135deg, rgba(25, 10, 0, 0.95) 0%, rgba(10, 5, 0, 0.95) 100%);
-  border: 1px solid #ff6600;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
   padding: 30px 40px 100px 40px;
-  box-shadow: 0 0 40px rgba(255, 102, 0, 0.15);
+  box-shadow: none;
   position: relative;
 }
 
