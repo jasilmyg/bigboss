@@ -65,6 +65,7 @@ if (regBtn) {
 document.addEventListener('DOMContentLoaded', () => {
   const popup = document.getElementById('welcome-popup');
   const closeBtn = document.getElementById('close-popup');
+  const popupLink = document.getElementById('popup-link');
 
   if (popup && closeBtn) {
     // Show popup with a slight delay
@@ -76,6 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn.addEventListener('click', () => {
       popup.classList.remove('active');
     });
+
+    // Close on clicking the image link
+    if (popupLink) {
+      popupLink.addEventListener('click', () => {
+        popup.classList.remove('active');
+      });
+    }
 
     // Close on clicking outside the image
     popup.addEventListener('click', (e) => {
