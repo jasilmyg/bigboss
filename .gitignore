@@ -31,3 +31,4 @@ uploads/
 token.pickle
 credentials.json
 client_secret.json
+render_secrets.txt

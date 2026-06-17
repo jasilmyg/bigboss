@@ -60,3 +60,28 @@ if (regBtn) {
     regBtn.style.letterSpacing = '2px';
   });
 }
+
+// Welcome Popup
+document.addEventListener('DOMContentLoaded', () => {
+  const popup = document.getElementById('welcome-popup');
+  const closeBtn = document.getElementById('close-popup');
+
+  if (popup && closeBtn) {
+    // Show popup with a slight delay
+    setTimeout(() => {
+      popup.classList.add('active');
+    }, 500);
+
+    // Close on button click
+    closeBtn.addEventListener('click', () => {
+      popup.classList.remove('active');
+    });
+
+    // Close on clicking outside the image
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) {
+        popup.classList.remove('active');
+      }
+    });
+  }
+});
