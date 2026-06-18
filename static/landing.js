@@ -37,6 +37,47 @@
   document.head.appendChild(style);
 })();
 
+// Generate fiery particles for the logo
+(function createFireParticles() {
+  const container = document.getElementById('fire-particles');
+  if (!container) return;
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 4 + 2;
+    const x = 30 + Math.random() * 40; // Center around logo
+    const y = 40 + Math.random() * 40;
+    const delay = Math.random() * 3;
+    const dur = 2 + Math.random() * 3;
+    const isGold = Math.random() > 0.5;
+    
+    // Mix of orange, red, and gold
+    const color = isGold ? 'rgba(255,215,0,0.8)' : (Math.random() > 0.5 ? 'rgba(255,140,0,0.8)' : 'rgba(255,69,0,0.8)');
+    
+    p.style.cssText = `
+      position:absolute;
+      left:${x}%;top:${y}%;
+      width:${size}px;height:${size}px;
+      border-radius:50%;
+      background:${color};
+      box-shadow:0 0 ${size*4}px ${color};
+      animation:fireFloat ${dur}s ${delay}s ease-in infinite;
+      pointer-events:none;
+    `;
+    container.appendChild(p);
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fireFloat {
+      0%   { transform: translateY(0px) scale(1);   opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { transform: translateY(-80px) scale(0.5); opacity: 0.8; }
+      100% { transform: translateY(-120px) scale(0);  opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 // Nav scroll effect
 window.addEventListener('scroll', () => {
   const nav = document.getElementById('top-nav');
