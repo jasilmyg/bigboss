@@ -4,7 +4,7 @@ import os
 import json
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import threading
 
 from google.oauth2.service_account import Credentials
@@ -271,8 +271,9 @@ def _register_impl():
             video.save(local_path)
 
     # Build record
+    ist_offset = timezone(timedelta(hours=5, minutes=30))
     record = {
-        "timestamp":     datetime.now().isoformat(sep=" ", timespec="seconds"),
+        "timestamp":     datetime.now(ist_offset).strftime('%Y-%m-%d %H:%M:%S'),
         "fullName":      full_name,
         "contactNumber": contact_number,
         "age":           age,
