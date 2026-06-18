@@ -5,6 +5,7 @@ import json
 import random
 import time
 from datetime import datetime
+import threading
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -259,25 +260,15 @@ def _register_impl():
     if errors:
         return jsonify({"success": False, "errors": errors}), 400
 
-    # Handle video upload
-    video_filename = ""
+    # Handle video upload locally
+    safe_name = ""
+    local_path = ""
     if "introVideo" in request.files:
         video = request.files["introVideo"]
         if video.filename:
             safe_name = f"{contact_number}_{int(time.time())}_{video.filename}"
             local_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_name)
             video.save(local_path)
-            
-            # Upload to Google Drive using OAuth
-            drive_url, drive_err = upload_to_drive(local_path, safe_name)
-            video_filename = drive_url if drive_url else safe_name
-            
-            if drive_url and os.path.exists(local_path):
-                try:
-                    os.remove(local_path)
-                except:
-                    pass
-
 
     # Build record
     record = {
@@ -289,42 +280,64 @@ def _register_impl():
         "email":         email,
         "city":          city,
         "aboutYourself": about,
-        "videoFilename": video_filename,
+        "videoFilename": "",
         "consent1":      consent1,
         "consent2":      consent2,
     }
 
-    # Save to Google Sheets
-    saved, sheet_err = append_to_sheet(record)
+    def process_upload_in_background(rec, path, name):
+        try:
+            video_filename = ""
+            if path and os.path.exists(path):
+                drive_url, drive_err = upload_to_drive(path, name)
+                video_filename = drive_url if drive_url else name
+                if drive_err:
+                    print(f"[Drive] Upload error: {drive_err}")
+                
+            rec["videoFilename"] = video_filename
+            
+            # Save to Google Sheets
+            saved, sheet_err = append_to_sheet(rec)
+            if not saved:
+                print(f"[Sheets] Append error: {sheet_err}")
 
-    # Always save locally as JSON backup
-    try:
-        backup_path = os.path.join(os.path.dirname(__file__), "registrations_backup.json")
-        backups = []
-        if os.path.exists(backup_path):
-            with open(backup_path, "r") as f:
+            # Always save locally as JSON backup
+            try:
+                backup_path = os.path.join(os.path.dirname(__file__), "registrations_backup.json")
+                backups = []
+                if os.path.exists(backup_path):
+                    with open(backup_path, "r") as f:
+                        try:
+                            backups = json.load(f)
+                        except Exception:
+                            backups = []
+                backups.append(rec)
+                with open(backup_path, "w") as f:
+                    json.dump(backups, f, indent=2)
+            except Exception as e:
+                print(f"[Backup] Failed to save backup: {e}")
+
+            print(f"[Register] Processed entry: {rec['fullName']} | {rec['contactNumber']} | Sheets={saved}")
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"Background upload error: {e}")
+        finally:
+            if path and os.path.exists(path):
                 try:
-                    backups = json.load(f)
-                except Exception:
-                    backups = []
-        backups.append(record)
-        with open(backup_path, "w") as f:
-            json.dump(backups, f, indent=2)
-    except Exception as e:
-        print(f"[Backup] Failed to save backup: {e}")
+                    os.remove(path)
+                except:
+                    pass
 
-    print(f"[Register] New entry: {full_name} | {contact_number} | Sheets={saved} | LocalVideo={video_filename}")
-
-    if not saved:
-        return jsonify({"success": False, "message": f"Google Sheets Error: {sheet_err}"}), 500
-
-    if video_filename and not video_filename.startswith("http"):
-         return jsonify({"success": False, "message": f"Google Drive Error: {drive_err}"}), 500
+    # Start the background thread so the HTTP response is sent immediately
+    thread = threading.Thread(target=process_upload_in_background, args=(record, local_path, safe_name))
+    thread.start()
 
     return jsonify({
         "success": True,
-        "message": "Registration successfully saved to Google Sheets and video uploaded to Google Drive!",
-        "saved_to_sheets": saved,
+        "message": "Registration received successfully! Uploading your video in the background...",
+        "saved_to_sheets": True,
     })
 
 
