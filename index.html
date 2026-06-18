@@ -237,6 +237,17 @@
   <!-- ── FLOATING STARS ── -->
   <div class="stars-overlay" aria-hidden="true"></div>
 
+  <!-- ── WELCOME POPUP ── -->
+  <div class="popup-overlay" id="welcome-popup">
+    <div class="popup-content">
+      <button class="close-btn" id="close-popup">&times;</button>
+      <a href="#registration-section" id="popup-link">
+        <!-- Assuming the user saves the uploaded image as popup_new.png in static folder -->
+        <img src="static/popup_new.png?v=2" alt="Bigg Boss Popup" class="popup-image" id="popup-img" />
+      </a>
+    </div>
+  </div>
+
   <script src="static/landing.js"></script>
   <script src="static/register.js"></script>
 </body>
