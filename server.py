@@ -56,16 +56,38 @@ import pickle
 
 def get_drive_service():
     try:
-        if os.environ.get("GOOGLE_CREDENTIALS_JSON"):
-            import json
-            creds_info = json.loads(os.environ.get("GOOGLE_CREDENTIALS_JSON"))
-            credentials = Credentials.from_service_account_info(creds_info, scopes=SCOPES)
-        else:
-            credentials = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
-            
-        return build('drive', 'v3', credentials=credentials), ""
+        scopes = ["https://www.googleapis.com/auth/drive"]
+        creds = None
+        
+        # Load from base64 env var if exists
+        import base64
+        import tempfile
+        import json
+        if os.environ.get("TOKEN_PICKLE_B64"):
+            creds = pickle.loads(base64.b64decode(os.environ.get("TOKEN_PICKLE_B64")))
+        elif os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+                
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                # If running on Render, we MUST have token in env! Local fallback below.
+                if os.environ.get("CLIENT_SECRET_JSON"):
+                    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+                        f.write(os.environ.get("CLIENT_SECRET_JSON"))
+                        secret_file = f.name
+                else:
+                    secret_file = 'client_secret.json'
+                    
+                flow = InstalledAppFlow.from_client_secrets_file(secret_file, scopes)
+                creds = flow.run_local_server(port=0)
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+        return build('drive', 'v3', credentials=creds), ""
     except Exception as e:
-        return None, f"Drive Auth failed: {str(e)}"
+        return None, f"Auth failed: {str(e)}"
 
 def upload_to_drive(file_path, original_filename):
     service, err = get_drive_service()
