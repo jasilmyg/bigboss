@@ -235,30 +235,60 @@ if (form) {
     }
 
     submitBtn.disabled = true;
-    submitTxt.textContent = 'SUBMITTING…';
+    submitTxt.textContent = 'PREPARING UPLOAD...';
+    
+    // Hide form, show progress screen immediately
+    hide(form);
+    const progressScreen = document.getElementById('progress-screen');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressSize = document.getElementById('progress-size');
+    show(progressScreen);
+    progressScreen.scrollIntoView({ behavior: 'smooth' });
 
     try {
       const fd = new FormData(form);
 
-      const res  = await fetch(`${API}/api/register`, { method: 'POST', body: fd });
-      
-      let data;
-      const contentType = res.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-          data = await res.json();
-      } else {
-          // If Render returned an HTML error page (like 502 Bad Gateway or 413 Payload Too Large)
-          const text = await res.text();
-          console.error("Non-JSON response:", res.status, text);
-          throw new Error(`Server returned ${res.status}: The file might be too large or the server timed out.`);
-      }
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API}/api/register`, true);
+
+      // Setup progress event
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          progressBarFill.style.width = percentComplete + '%';
+          progressPercent.textContent = percentComplete + '%';
+          
+          const loadedMB = (e.loaded / (1024 * 1024)).toFixed(1);
+          const totalMB = (e.total / (1024 * 1024)).toFixed(1);
+          progressSize.textContent = `${loadedMB} MB / ${totalMB} MB`;
+        }
+      });
+
+      const data = await new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch (err) {
+              reject(new Error(`Server returned non-JSON response: ${xhr.status}`));
+            }
+          } else {
+            reject(new Error(`Server returned ${xhr.status}: The file might be too large or the server timed out.`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network error. Please check your connection and try again.'));
+        xhr.send(fd);
+      });
 
       if (data.success) {
         // Show success
-        hide(form);
+        hide(progressScreen);
         show(successScreen);
         successScreen.scrollIntoView({ behavior: 'smooth' });
       } else {
+        hide(progressScreen);
+        show(form);
         const msgs = data.errors ? data.errors.join(' • ') : (data.message || 'Submission failed.');
         globalErr.textContent = msgs;
         show(globalErr);
@@ -267,6 +297,8 @@ if (form) {
       }
     } catch (err) {
       console.error(err);
+      hide(progressScreen);
+      show(form);
       globalErr.textContent = err.message || 'Network error. Please check your connection and try again.';
       show(globalErr);
       submitBtn.disabled = false;
