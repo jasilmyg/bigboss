@@ -94,17 +94,23 @@ def upload_to_drive(file_path, original_filename):
         return "", f"Drive auth config error: {err}"
     try:
         file_metadata = {'name': original_filename, 'parents': ['1jGAYXpEs5nz0VsF0qSN0Kw79A7cI_6s2']}
-        media = MediaFileUpload(file_path, resumable=True)
-        file = service.files().create(body=file_metadata, media_body=media, fields='id, webViewLink', supportsAllDrives=True).execute()
+        media = MediaFileUpload(file_path, resumable=True, chunksize=1024*1024*5)
+        request = service.files().create(body=file_metadata, media_body=media, fields='id, webViewLink', supportsAllDrives=True)
         
+        response = None
+        while response is None:
+            status, response = request.next_chunk()
+            if status:
+                print(f"[Drive] Uploading {original_filename}: {int(status.progress() * 100)}%")
+                
         # Make the file publicly accessible so anyone with the link can view
         service.permissions().create(
-            fileId=file.get('id'),
+            fileId=response.get('id'),
             body={'type': 'anyone', 'role': 'reader'},
             supportsAllDrives=True
         ).execute()
         
-        return file.get('webViewLink'), ""
+        return response.get('webViewLink'), ""
     except Exception as e:
         return "", f"Drive upload failed: {str(e)}"
 
@@ -287,6 +293,7 @@ def _register_impl():
     }
 
     def process_upload_in_background(rec, path, name):
+        drive_success = False
         try:
             video_filename = ""
             if path and os.path.exists(path):
@@ -294,6 +301,8 @@ def _register_impl():
                 video_filename = drive_url if drive_url else name
                 if drive_err:
                     print(f"[Drive] Upload error: {drive_err}")
+                else:
+                    drive_success = True
                 
             rec["videoFilename"] = video_filename
             
@@ -326,10 +335,13 @@ def _register_impl():
             print(f"Background upload error: {e}")
         finally:
             if path and os.path.exists(path):
-                try:
-                    os.remove(path)
-                except:
-                    pass
+                if drive_success:
+                    try:
+                        os.remove(path)
+                    except:
+                        pass
+                else:
+                    print(f"[Important] Drive upload failed, kept the video locally at: {path}")
 
     # Start the background thread so the HTTP response is sent immediately
     thread = threading.Thread(target=process_upload_in_background, args=(record, local_path, safe_name))
