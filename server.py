@@ -100,7 +100,7 @@ def upload_to_drive(file_path, original_filename):
         
         response = None
         while response is None:
-            status, response = request.next_chunk()
+            status, response = request.next_chunk(num_retries=10)
             if status:
                 print(f"[Drive] Uploading {original_filename}: {int(status.progress() * 100)}%")
                 
@@ -109,7 +109,7 @@ def upload_to_drive(file_path, original_filename):
             fileId=response.get('id'),
             body={'type': 'anyone', 'role': 'reader'},
             supportsAllDrives=True
-        ).execute()
+        ).execute(num_retries=5)
         
         return response.get('webViewLink'), ""
     except Exception as e:
@@ -347,17 +347,20 @@ def _register_impl():
         "consent2":      consent2,
     }
 
-    def process_upload_in_background(rec, path, name):
+    def process_upload_in_background(rec, path, name, base_url):
         drive_success = False
         try:
             video_filename = ""
             if path and os.path.exists(path):
                 drive_url, drive_err = upload_to_drive(path, name)
-                video_filename = drive_url if drive_url else name
+                
                 if drive_err:
                     print(f"[Drive] Upload error: {drive_err}")
+                    # FALLBACK: Provide the direct link to the video on this server
+                    video_filename = f"{base_url}uploads/{name}"
                 else:
                     drive_success = True
+                    video_filename = drive_url
                 
             rec["videoFilename"] = video_filename
             
@@ -398,8 +401,9 @@ def _register_impl():
                 else:
                     print(f"[Important] Drive upload failed, kept the video locally at: {path}")
 
+    base_url = request.url_root
     # Start the background thread so the HTTP response is sent immediately
-    thread = threading.Thread(target=process_upload_in_background, args=(record, local_path, safe_name))
+    thread = threading.Thread(target=process_upload_in_background, args=(record, local_path, safe_name, base_url))
     thread.start()
 
     return jsonify({
