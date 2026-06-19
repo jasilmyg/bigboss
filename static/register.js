@@ -274,7 +274,7 @@ if (form) {
             if (xhr.status >= 200 && xhr.status < 300) {
               reject(new Error(`Server returned non-JSON response: ${xhr.status}`));
             } else {
-              reject(new Error(`Server returned ${xhr.status}: The file might be too large or the server timed out.`));
+              reject(new Error(`Upload Failed: Please ensure the video is uploaded within 10 minutes. Your internet connection may be too slow for a file this large.`));
             }
           }
         };
