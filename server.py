@@ -4,6 +4,7 @@ import os
 import json
 import random
 import time
+import re
 from datetime import datetime, timezone, timedelta
 import threading
 
@@ -156,6 +157,32 @@ def append_to_sheet(data: dict):
 # ─────────────────────────────────────────────
 # OTP store (in-memory; swap for Redis/DB later)
 # ─────────────────────────────────────────────
+def is_already_registered(phone):
+    # 1. Check Google Sheet first (so manual deletions allow re-registration)
+    try:
+        sheet, err = get_sheet()
+        if sheet:
+            # Column 3 is 'Contact Number'
+            registered_phones = sheet.col_values(3)
+            if phone in registered_phones:
+                return True
+            return False  # If Google Sheet check succeeded and it's not there, they are not registered!
+    except Exception as e:
+        print(f"Sheet duplicate check error: {e}")
+
+    # 2. Fallback to local JSON only if the Google API is unreachable
+    try:
+        backup_path = os.path.join(os.path.dirname(__file__), "registrations_backup.json")
+        if os.path.exists(backup_path):
+            with open(backup_path, "r") as f:
+                backups = json.load(f)
+                for rec in backups:
+                    if rec.get("contactNumber") == phone:
+                        return True
+    except Exception as e:
+        print(f"Duplicate check error: {e}")
+    return False
+
 otp_store = {}   # { phone: { "otp": "123456", "expires": timestamp } }
 
 # ─────────────────────────────────────────────
@@ -197,6 +224,9 @@ def send_otp():
 
     if not phone or len(phone) != 10 or not phone.isdigit():
         return jsonify({"success": False, "message": "Enter a valid 10-digit mobile number."}), 400
+
+    if is_already_registered(phone):
+        return jsonify({"success": False, "message": "This mobile number has already been registered."}), 400
 
     otp = str(random.randint(100000, 999999))
     otp_store[phone] = {"otp": otp, "expires": time.time() + 300}  # 5-min TTL
@@ -252,16 +282,41 @@ def _register_impl():
 
     # Basic validation
     errors = []
-    if not full_name:       errors.append("Full Name is required.")
-    if not contact_number:  errors.append("Contact Number is required.")
-    if not age:             errors.append("Age is required.")
-    if not gender:          errors.append("Gender is required.")
-    if not email:           errors.append("Email is required.")
-    if not city:            errors.append("City is required.")
-    if not about:           errors.append("Tell Us About Yourself is required.")
-    if consent1 != "agree": errors.append("You must agree to the participation terms.")
+    if not full_name:
+        errors.append("Full Name is required.")
+        
+    if not contact_number or not contact_number.isdigit() or len(contact_number) != 10:
+        errors.append("Enter a valid 10-digit mobile number.")
+        
+    try:
+        if not age or int(age) < 18:
+            errors.append("You must be at least 18 years old.")
+    except ValueError:
+        errors.append("Enter a valid numeric age.")
+        
+    if not gender:
+        errors.append("Gender is required.")
+        
+    if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        errors.append("Enter a valid email address.")
+        
+    if not city or not re.match(r"^[A-Za-z\s\-]+$", city):
+        errors.append("City must contain text only.")
+        
+    if not about:
+        errors.append("Tell Us About Yourself is required.")
+        
+    if consent1 != "agree":
+        errors.append("You must agree to the participation terms.")
+        
     if consent2 not in ("agree", "agree_disability"):
         errors.append("You must agree to the Privacy Notice.")
+        
+    if "introVideo" not in request.files or not request.files["introVideo"].filename:
+        errors.append("An intro video is required.")
+
+    if is_already_registered(contact_number):
+        errors.append("This mobile number has already been registered.")
 
     if errors:
         return jsonify({"success": False, "errors": errors}), 400

@@ -267,14 +267,15 @@ if (form) {
 
       const data = await new Promise((resolve, reject) => {
         xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              resolve(JSON.parse(xhr.responseText));
-            } catch (err) {
+          try {
+            const parsed = JSON.parse(xhr.responseText);
+            resolve(parsed);
+          } catch (err) {
+            if (xhr.status >= 200 && xhr.status < 300) {
               reject(new Error(`Server returned non-JSON response: ${xhr.status}`));
+            } else {
+              reject(new Error(`Server returned ${xhr.status}: The file might be too large or the server timed out.`));
             }
-          } else {
-            reject(new Error(`Server returned ${xhr.status}: The file might be too large or the server timed out.`));
           }
         };
         xhr.onerror = () => reject(new Error('Network error. Please check your connection and try again.'));
