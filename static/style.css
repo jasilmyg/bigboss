@@ -6,12 +6,12 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --purple-dark:   #2a0040;
-  --purple-mid:    #4a0072;
-  --purple-rich:   #6a0dad;
-  --purple-bright: #d500f9;
-  --pink-hot:      #ff4081;
-  --pink-deep:     #c51162;
+  --purple-dark:   #170500;
+  --purple-mid:    #2e0b00;
+  --purple-rich:   #6b1d00;
+  --purple-bright: #ff6600;
+  --pink-hot:      #ff8800;
+  --pink-deep:     #cc3300;
   --gold-bright:   #ffd700;
   --gold-mid:      #f0a500;
   --gold-dark:     #c67c00;
@@ -24,7 +24,7 @@
   --glass-border:  rgba(255,255,255,0.12);
   --input-bg:      rgba(255,255,255,0.07);
   --input-border:  rgba(255,255,255,0.18);
-  --input-focus:   rgba(232,93,244,0.6);
+  --input-focus:   rgba(255,102,0,0.6);
   --error-color:   #ff6b6b;
   --success-color: #4ade80;
   --font-main:     'Outfit', sans-serif;
@@ -56,7 +56,7 @@ input, select, textarea { font-family: var(--font-main); }
     radial-gradient(1.5px 1.5px at 20% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 60% 35%, rgba(255,255,255,0.4) 0%, transparent 100%),
     radial-gradient(1px 1px at 80% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(2px 2px at 40% 75%, rgba(232,93,244,0.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 40% 75%, rgba(255,102,0,0.3) 0%, transparent 100%),
     radial-gradient(1px 1px at 15% 50%, rgba(255,255,255,0.4) 0%, transparent 100%);
 }
 
@@ -67,9 +67,9 @@ input, select, textarea { font-family: var(--font-main); }
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: stretch; justify-content: space-between;
   padding: 0 40px; height: 80px;
-  background: #1a0033;
-  border-bottom: 2px solid #d500f9;
-  box-shadow: 0 0 10px rgba(213,0,249,0.3);
+  background: #0b0f19;
+  border-bottom: 2px solid #ff6600;
+  box-shadow: 0 0 10px rgba(255,102,0,0.3);
 }
 
 .nav-left, .nav-right {
@@ -109,14 +109,14 @@ input, select, textarea { font-family: var(--font-main); }
   transition: var(--transition);
 }
 .outline-icon {
-  border: 2px solid #d500f9; color: #d500f9; background: transparent;
-  box-shadow: 0 0 8px rgba(213,0,249,0.3);
+  border: 2px solid #ff6600; color: #ff6600; background: transparent;
+  box-shadow: 0 0 8px rgba(255,102,0,0.3);
 }
 .solid-icon {
   border: 1px solid #11001c; color: #11001c; background: transparent;
 }
 .social-icon:hover {
-  transform: scale(1.1); box-shadow: 0 0 8px rgba(213,0,249,0.5);
+  transform: scale(1.1); box-shadow: 0 0 8px rgba(255,102,0,0.5);
 }
 
 .hotstar-logo {
@@ -129,7 +129,7 @@ input, select, textarea { font-family: var(--font-main); }
    LANDING PAGE
    ================================================================ */
 .landing-body {
-  background: linear-gradient(135deg, #2b0057 0%, #1a0033 50%, #3a0062 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1f0f00 50%, #050505 100%);
   overflow-x: hidden;
 }
 
@@ -148,12 +148,12 @@ input, select, textarea { font-family: var(--font-main); }
 }
 .hero-glow-1 {
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(213,0,249,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,102,0,0.15) 0%, transparent 70%);
   top: -100px; left: -100px;
 }
 .hero-glow-2 {
   width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(213,0,249,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,102,0,0.1) 0%, transparent 70%);
   bottom: -80px; right: 100px;
   animation-delay: 2s;
 }
@@ -181,9 +181,9 @@ input, select, textarea { font-family: var(--font-main); }
 .hero-divider {
   width: 80px;
   height: 4px;
-  background: #d500f9;
+  background: #ff6600;
   border-radius: 2px;
-  box-shadow: 0 0 15px #d500f9, 0 0 5px #d500f9;
+  box-shadow: 0 0 15px #ff6600, 0 0 5px #ff6600;
   margin-top: -10px;
   margin-bottom: 10px;
 }
@@ -192,14 +192,14 @@ input, select, textarea { font-family: var(--font-main); }
   font-size: clamp(24px, 3vw, 32px); font-weight: 600;
   color: var(--white); letter-spacing: 1.5px;
   text-transform: none; 
-  text-shadow: 0 0 15px rgba(213,0,249,0.8), 0 0 5px rgba(213,0,249,0.5);
+  text-shadow: 0 0 15px rgba(255,102,0,0.8), 0 0 5px rgba(255,102,0,0.5);
 }
 
 .hero-title {
   font-family: var(--font-main);
   font-size: clamp(36px, 5vw, 56px); font-weight: 700;
   color: var(--white); line-height: 1.1;
-  text-shadow: 0 0 25px rgba(213,0,249,0.8), 0 0 10px rgba(213,0,249,0.6);
+  text-shadow: 0 0 25px rgba(255,102,0,0.8), 0 0 10px rgba(255,102,0,0.6);
   margin-bottom: 20px;
   letter-spacing: 2.5px;
 }
@@ -217,20 +217,20 @@ input, select, textarea { font-family: var(--font-main); }
 .register-btn {
   position: relative; display: inline-block; overflow: hidden;
   padding: 16px 48px; border-radius: 12px;
-  border: 2px solid #d500f9;
-  background: #1a0033;
+  border: 2px solid #ff6600;
+  background: #0b0f19;
   color: var(--white); font-family: var(--font-main);
   font-size: 18px; font-weight: 800; letter-spacing: 1.5px;
   text-transform: uppercase; text-align: center;
   transition: var(--transition);
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(213,0,249,0.4);
+  box-shadow: 0 0 20px rgba(255,102,0,0.4);
   margin-top: 20px;
 }
 .register-btn:hover {
-  background: #d500f9;
+  background: #ff6600;
   color: #fff;
-  box-shadow: 0 0 40px rgba(213,0,249,0.7);
+  box-shadow: 0 0 40px rgba(255,102,0,0.7);
   transform: translateY(-2px);
 }
 
@@ -356,8 +356,8 @@ input, select, textarea { font-family: var(--font-main); }
   left: 2%;
   right: 2%;
   height: 6px;
-  background: linear-gradient(90deg, transparent, rgba(213,0,249, 0.8), transparent);
-  box-shadow: 0 0 30px rgba(213,0,249, 0.8), 0 0 60px rgba(213,0,249, 0.4);
+  background: linear-gradient(90deg, transparent, rgba(255,102,0, 0.8), transparent);
+  box-shadow: 0 0 30px rgba(255,102,0, 0.8), 0 0 60px rgba(255,102,0, 0.4);
   border-radius: 50%;
   z-index: 25;
   pointer-events: none;
@@ -376,8 +376,8 @@ input, select, textarea { font-family: var(--font-main); }
   left: 2%;
   right: 2%;
   height: 6px;
-  background: linear-gradient(90deg, transparent, rgba(213,0,249, 0.8), transparent);
-  box-shadow: 0 0 30px rgba(213,0,249, 0.8), 0 0 60px rgba(213,0,249, 0.4);
+  background: linear-gradient(90deg, transparent, rgba(255,102,0, 0.8), transparent);
+  box-shadow: 0 0 30px rgba(255,102,0, 0.8), 0 0 60px rgba(255,102,0, 0.4);
   border-radius: 50%;
   z-index: 25;
   pointer-events: none;
@@ -436,8 +436,8 @@ input, select, textarea { font-family: var(--font-main); }
 /* Form Card */
 .form-card {
   width: 100%; max-width: 680px;
-  background: rgba(45, 0, 75, 0.6);
-  border: 1px solid rgba(213, 0, 249, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 102, 0, 0.3);
   border-radius: var(--radius-lg);
   padding: 30px 40px 100px 40px;
   box-shadow: none;
@@ -565,7 +565,7 @@ input, select, textarea { font-family: var(--font-main); }
   color: var(--white); font-size: 12px; font-weight: 700; cursor: pointer;
   white-space: nowrap; transition: var(--transition);
 }
-.upload-video-btn:hover { background: #d500f9; transform: scale(1.02); }
+.upload-video-btn:hover { background: #ff6600; transform: scale(1.02); }
 
 .hidden-file-input { display: none; }
 
@@ -631,14 +631,14 @@ input, select, textarea { font-family: var(--font-main); }
   position: relative; overflow: hidden;
   width: 100%; padding: 10px 16px; border-radius: 8px;
   background: #2a1100;
-  border: 1px solid #d500f9; color: var(--white);
+  border: 1px solid #ff6600; color: var(--white);
   font-family: var(--font-display); font-size: 14px; font-weight: 700;
   letter-spacing: 2px; text-transform: uppercase;
   transition: var(--transition);
   box-shadow: none;
 }
 .submit-btn:hover:not(:disabled) {
-  background: rgba(213,0,249,0.3);
+  background: rgba(255,102,0,0.3);
   box-shadow: none;
   transform: translateY(-2px);
 }
@@ -927,10 +927,10 @@ input, select, textarea { font-family: var(--font-main); }
   max-width: 90vw;
   max-height: 90vh;
   border-radius: 12px;
-  box-shadow: 0 0 40px rgba(213,0,249,0.5);
+  box-shadow: 0 0 40px rgba(255,102,0,0.5);
   transform: scale(0.9);
   transition: transform 0.4s ease;
-  background: #1a0033;
+  background: #0b0f19;
 }
 
 .popup-overlay.active .popup-content {
@@ -951,7 +951,7 @@ input, select, textarea { font-family: var(--font-main); }
   right: -15px;
   width: 36px;
   height: 36px;
-  background: #d500f9;
+  background: #ff6600;
   color: white;
   border: 2px solid white;
   border-radius: 50%;
