@@ -22,7 +22,7 @@ import gspread
 # when ready – just fill the constants below)
 # ─────────────────────────────────────────────
 GOOGLE_SHEETS_CREDENTIALS_FILE = "credentials.json"   # service-account JSON
-SPREADSHEET_ID = "1bsbCYg1Y2yjlsEPuHbEjJBTb0ycHAPhWxzH1WXKHWw0"           # from the sheet URL
+SPREADSHEET_ID = "1GW2fJjyQk3rkScM2fDpbBzHJd3E_RntudmG7Ml-H1jM"           # from the sheet URL
 SHEET_NAME = "Registrations"
 _sheet = None
 
@@ -94,7 +94,7 @@ def upload_to_drive(file_path, original_filename):
     if not service:
         return "", f"Drive auth config error: {err}"
     try:
-        file_metadata = {'name': original_filename, 'parents': ['1jGAYXpEs5nz0VsF0qSN0Kw79A7cI_6s2']}
+        file_metadata = {'name': original_filename, 'parents': ['1OUZYtqNYNs4dimRShz2_vSi1r3TfYALD']}
         media = MediaFileUpload(file_path, resumable=True, chunksize=1024*1024*5)
         request = service.files().create(body=file_metadata, media_body=media, fields='id, webViewLink', supportsAllDrives=True)
         
