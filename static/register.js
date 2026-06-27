@@ -294,7 +294,7 @@ if (form) {
         globalErr.textContent = msgs;
         show(globalErr);
         submitBtn.disabled = false;
-        submitTxt.textContent = "I'M READY FOR AGNIPAREEKSHA!";
+        submitTxt.textContent = "SUBMIT YOUR FILM TODAY!";
       }
     } catch (err) {
       console.error(err);
@@ -303,7 +303,7 @@ if (form) {
       globalErr.textContent = err.message || 'Network error. Please check your connection and try again.';
       show(globalErr);
       submitBtn.disabled = false;
-      submitTxt.textContent = "I'M READY FOR AGNIPAREEKSHA!";
+      submitTxt.textContent = "SUBMIT YOUR FILM TODAY!";
     }
   });
 }
